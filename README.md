@@ -4,7 +4,8 @@
 *After running script dataset looks like:*
 
 bash
-```description2code_clean
+```
+description2code_clean
 ├── problem_1
 ├── problem_2
 │   ├── deccription.txt
