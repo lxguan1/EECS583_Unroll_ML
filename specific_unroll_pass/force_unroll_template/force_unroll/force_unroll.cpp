@@ -51,6 +51,7 @@ namespace Correctness{
 struct FPLICMPass : public LoopPass {
   static char ID;
   bool found_target = false;
+  const unsigned int unroll_amount = 2;
   FPLICMPass() : LoopPass(ID) {}
 
   void printInstruction(Instruction* instr) {
@@ -87,7 +88,7 @@ struct FPLICMPass : public LoopPass {
       // Create new llvm.loop.unroll.count metadata
       MDNode *UnrollCountMD = MDNode::get(Context, MDString::get(Context, "llvm.loop.unroll.count"));
       Type *I32Ty = Type::getInt32Ty(Context);
-      Constant *Two = ConstantInt::get(I32Ty, 4);
+      Constant *Two = ConstantInt::get(I32Ty, unroll_amount); // unroll_amount constant set as member variable
       ops.push_back(MDString::get(Context, "llvm.loop.unroll.count"));
       ops.push_back(ValueAsMetadata::getConstant(Two));
       MDNode *nodes = MDNode::get(Context, ops);
@@ -121,13 +122,6 @@ struct FPLICMPass : public LoopPass {
       MDNode *NewLoopID = makePostTransformationMetadata(Context, LoopID, {}, {disable_nonforced});
       L->setLoopID(NewLoopID);
     }
-
-    // LoopNest object for this loop
-    // if !found_target and nest_depth == 1
-      // found target = true
-      // Changed = true
-      // do stuff 
-    /* *******Implementation Ends Here******* */
     
     return Changed;
   }

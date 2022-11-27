@@ -10,6 +10,7 @@ int main(){
 	for(i = 0; i < 10; i++) {
   		B[i] = A[j];
         j++;
+		printf("test\n");
 	}
 
 	return 0;
