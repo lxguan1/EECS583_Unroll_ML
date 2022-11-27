@@ -1,1 +1,9 @@
 *.pdf
+*.zip
+*.bc
+
+# For lance
+specific_unroll_pass/*.tgz 
+specific_unroll_pass/hw1pass.cpp
+description2code_clean/*
+my_toolchain
