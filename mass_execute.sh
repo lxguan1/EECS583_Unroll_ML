@@ -1,14 +1,33 @@
 #!/bin/bash
 
 # Iterate through each problem in description2code, run generated executable 
-PROBLEM_ROOT_DIR="./specific_unroll_pass"
+PROBLEM_ROOT_DIR="./description2code_subset"
+unrollFactors=(1 2 3 4)
 
-for PROBLEM in "${PROBLEM_ROOT_DIR}/*"; do 
-    PROBLEM_DIR="${PROBLEM_ROOT_DIR}/${PROBLEM}"
-    SOURCE_FILE_NO_EXT="${PROBLEM_DIR}/solution"
+# Clean up unroll times from here
+rm -f ${PROBLEM_ROOT_DIR}/*/unroll_times.txt
 
-    clang -emit-llvm -S ${SOURCE_FILE_NO_EXT}.cpp -c -o ${SOURCE_FILE_NO_EXT}.bc
-    opt -enable-new-pm=0 -S -o ${SOURCE_FILE_NO_EXT}.unroll.bc -load ${PATH2LIB} ${PASS} < ${SOURCE_FILE_NO_EXT}.bc > /dev/null
-    clang ${SOURCE_FILE_NO_EXT}.unroll.bc -o ${SOURCE_FILE_NO_EXT}_unroll
+# For each unroll factor, iterate over problems and run
+for i in ${unrollFactors[@]}; do
+    for PROBLEM_DIR in ${PROBLEM_ROOT_DIR}/*; do 
+        echo ${PROBLEM_DIR}
+        EXEC_FILE="${PROBLEM_DIR}/solution_unroll_${i}"
+        TIME_FILE="${PROBLEM_DIR}/unroll_times.txt"
 
-done
+        # old time format
+        # EXEC_TIME="$(TIMEFORMAT='%lR';time ( ./${EXEC_FILE} < ${PROBLEM_DIR}/samples/1_input.txt ) 2>&1 1>/dev/null )"
+
+        # Get time in nanoseconds
+        START="$(date +%s%N)"
+        ./${EXEC_FILE} < ${PROBLEM_DIR}/samples/1_input.txt 2>&1 1>/dev/null
+        NS_TIME=$(($(date +%s%N)-${START}))
+        # echo ${EXEC_TIME}
+        # echo ${EXEC_TIME} >> "${TIME_FILE}"
+        echo ${NS_TIME} >> "${TIME_FILE}"
+
+    done
+
+
+
+done 
+

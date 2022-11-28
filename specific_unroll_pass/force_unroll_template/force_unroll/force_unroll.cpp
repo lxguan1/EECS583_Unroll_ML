@@ -51,7 +51,7 @@ namespace Correctness{
 struct FPLICMPass : public LoopPass {
   static char ID;
   bool found_target = false;
-  const unsigned int unroll_amount = 2;
+  const unsigned int unroll_amount = 1;
   FPLICMPass() : LoopPass(ID) {}
 
   void printInstruction(Instruction* instr) {
