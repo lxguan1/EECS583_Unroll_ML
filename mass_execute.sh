@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # Iterate through each problem in description2code, run generated executable 
-PROBLEM_ROOT_DIR="./description2code_subset"
-unrollFactors=(1 2 3 4)
+PROBLEM_ROOT_DIR="./description2code_clean"
+unrollFactors=(4)
 
 # Clean up unroll times from here
-rm -f ${PROBLEM_ROOT_DIR}/*/unroll_times.txt
+# rm -f ${PROBLEM_ROOT_DIR}/*/unroll_times.txt
 
 # For each unroll factor, iterate over problems and run
 for i in ${unrollFactors[@]}; do
@@ -16,6 +16,12 @@ for i in ${unrollFactors[@]}; do
 
         # old time format
         # EXEC_TIME="$(TIMEFORMAT='%lR';time ( ./${EXEC_FILE} < ${PROBLEM_DIR}/samples/1_input.txt ) 2>&1 1>/dev/null )"
+
+        if ! [ -f ${PROBLEM_DIR}/samples/1_input.txt ]; then # 120_B
+            echo "skipping ${PROBLEM_DIR}"
+            # mv ${PROBLEM_DIR} description2code_garbage
+            continue
+        fi
 
         # Get time in nanoseconds
         START="$(date +%s%N)"

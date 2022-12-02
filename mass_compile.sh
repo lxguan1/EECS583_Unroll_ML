@@ -9,12 +9,17 @@
 PROBLEM_ROOT_DIR="./description2code_clean"
 PATH2LIB=~/EECS583_Unroll_ML/specific_unroll_pass/force_unroll_template/build/force_unroll/LLVMHW2.so        # Specify your build directory in the project
 PASS=-force-unroll
-UNROLL_COUNT="1" # DECIDED IN LLVM PASS, NEED TO CHECK AND MATCH
+UNROLL_COUNT="4" # DECIDED IN LLVM PASS, NEED TO CHECK AND MATCH
 
 for PROBLEM_DIR in ${PROBLEM_ROOT_DIR}/*; do 
     # PROBLEM_DIR="./description2code_clean/1_A"
     # echo ${PROBLEM_DIR}
     SOURCE_FILE_NO_EXT="${PROBLEM_DIR}/solution"
+
+    if [ -f ${SOURCE_FILE_NO_EXT}_unroll_${UNROLL_COUNT} ]; then
+        echo "skipping ${PROBLEM_DIR}"
+        continue
+    fi
 
     # Try to compile to bitcode
     clang++ --gcc-toolchain=my_toolchain -emit-llvm -S ${SOURCE_FILE_NO_EXT}.cpp -c -o ${SOURCE_FILE_NO_EXT}.bc

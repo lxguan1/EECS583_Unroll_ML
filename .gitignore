@@ -1,9 +1,12 @@
 *.pdf
 *.zip
 *.bc
+*.json
+*.csv
 
 # For lance
 specific_unroll_pass/*.tgz 
 specific_unroll_pass/hw1pass.cpp
 description2code*
 my_toolchain
+
