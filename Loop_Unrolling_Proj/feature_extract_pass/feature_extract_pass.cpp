@@ -58,6 +58,10 @@ using namespace llvm;
       bool Changed = false;
 
       /* *******Implementation Starts Here******* */
+      BlockFrequencyInfo &bfi =
+          getAnalysis<BlockFrequencyInfoWrapperPass>().getBFI();
+      BranchProbabilityInfo &bpi =
+          getAnalysis<BranchProbabilityInfoWrapperPass>().getBPI();
       LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>().getLoopInfo();
       //MachineTraceMetrics &MTM = getAnalysis<MachineFunctionPass>().get
       ScalarEvolution &SE = getAnalysis<ScalarEvolutionWrapperPass>().getSE();
@@ -70,6 +74,48 @@ using namespace llvm;
       // Critical path length
       // Live ranges?
       // 
+
+      //Get LoopNest Level
+      LoopNest ln = LoopNest(*L, SE);
+      unsigned int depth = ln.getNestDepth();
+
+      //Get Trace Instruction Length
+      BasicBlock *currBB = L->getHeader();
+      int traceLength = 0;
+
+      // Loop through basic blocks, starting from the header
+      // Get the frequent path of the loop.
+      while (true)
+      {
+        bool freq_path = false;
+
+        // Loop through successor blocks
+        for (BasicBlock *bb : successors(currBB))
+        {
+          BranchProbability bprob = bpi.getEdgeProbability(
+              &(*currBB), bb);
+
+          // break on backedge
+          if (bb == L->getHeader())
+          {
+            freq_path = false;
+            break;
+          }
+          if ((bprob.getNumerator() * 1.0 / bprob.getDenominator() - 0.8) >= -1e-8) // Floating point comparison
+          {
+            currBB = bb;
+            traceLength += std::distance(bb->begin(), bb->end());
+            freq_path = true;
+            break;
+          }
+        }
+
+        // If there are no frequent branches, exit the loop
+        if (freq_path == false)
+        {
+          break;
+        }
+      }
       
       //Get # of operations, # of memory operations, and # of operands:
       int numOperations = 0;
@@ -105,17 +151,18 @@ using namespace llvm;
       }
 
       //Get TripCount
-      int tripCount = SE.getSmallConstantTripCount(L);
+      unsigned int tripCount = SE.getSmallConstantTripCount(L);
 
       //Critical Path
 
       //Live Range
 
       //Save Results:
-      unsigned LoopId = L->getLoopID()->getMetadataID();
+      //unsigned LoopId = L->getLoopID()->getMetadataID();
       std::ofstream csv_file;
       csv_file.open("extracted_features.csv", std::ios_base::app);
-      csv_file << LoopId << "," << numOperations << "," << numMemoryOps << "," << numOperands << "," << tripCount << "\n";
+      csv_file << numOperations << "," << numMemoryOps << "," << numOperands 
+      << "," << tripCount << "," << traceLength << "," << depth << "\n";
       csv_file.close();
       
       
@@ -127,6 +174,8 @@ using namespace llvm;
     {
       AU.addRequired<LoopInfoWrapperPass>();
       AU.addRequired<ScalarEvolutionWrapperPass>();
+      AU.addRequired<BranchProbabilityInfoWrapperPass>();
+      AU.addRequired<BlockFrequencyInfoWrapperPass>();
       //AU.addRequired<MachineFunctionWrapperPass>();
     }
 
