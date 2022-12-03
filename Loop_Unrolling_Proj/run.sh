@@ -37,7 +37,7 @@ setup
 # This approach has an issue with -O2, so we are going to stick with default optimization level (-O0)
 clang++ -emit-llvm -c -S ${BENCH} -o ${1}.bc --gcc-toolchain=toolchain
 
-opt -enable-new-pm=0 -loop-simplify ${1}.bc -o ${1}.ls.bc
+opt -enable-new-pm=0 -loop-simplify -indvars -scalar-evolution ${1}.bc -o ${1}.ls.bc
 # Instrument profiler
 opt -enable-new-pm=0 -pgo-instr-gen -instrprof ${1}.ls.bc -o ${1}.ls.prof.bc
 # Generate binary executable with profiler embedded
