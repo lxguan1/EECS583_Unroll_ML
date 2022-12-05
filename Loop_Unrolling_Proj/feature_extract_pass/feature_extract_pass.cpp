@@ -33,6 +33,7 @@
 #include "llvm/CodeGen/MachineFunctionPass.h"
 #include "llvm/CodeGen/MachineTraceMetrics.h"
 #include "llvm/Analysis/ScalarEvolution.h"
+#include "llvm/Analysis/DependenceAnalysis.h"
 
 #include <vector>
 #include <algorithm>
@@ -65,7 +66,8 @@ using namespace llvm;
       LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>().getLoopInfo();
       //MachineTraceMetrics &MTM = getAnalysis<MachineFunctionPass>().get
       ScalarEvolution &SE = getAnalysis<ScalarEvolutionWrapperPass>().getSE();
-
+      DependenceInfo &DI = getAnalysis<DependenceAnalysisWrapperPass>().getDI();
+      
 
       // # of operations
       // # of memory operations
@@ -77,45 +79,11 @@ using namespace llvm;
 
       //Get LoopNest Level
       LoopNest ln = LoopNest(*L, SE);
-      unsigned int depth = ln.getNestDepth();
-
-      //Get Trace Instruction Length
-      BasicBlock *currBB = L->getHeader();
-      int traceLength = 0;
-
-      // Loop through basic blocks, starting from the header
-      // Get the frequent path of the loop.
-      while (true)
-      {
-        bool freq_path = false;
-
-        // Loop through successor blocks
-        for (BasicBlock *bb : successors(currBB))
-        {
-          BranchProbability bprob = bpi.getEdgeProbability(
-              &(*currBB), bb);
-
-          // break on backedge
-          if (bb == L->getHeader())
-          {
-            freq_path = false;
-            break;
-          }
-          if ((bprob.getNumerator() * 1.0 / bprob.getDenominator() - 0.8) >= -1e-8) // Floating point comparison
-          {
-            currBB = bb;
-            traceLength += std::distance(bb->begin(), bb->end());
-            freq_path = true;
-            break;
-          }
-        }
-
-        // If there are no frequent branches, exit the loop
-        if (freq_path == false)
-        {
-          break;
-        }
-      }
+      unsigned int depth = ln.getNesttDepth();
+      
+      //int maxMemDepSize = 0;
+      //int minMemDepSize = 0;
+      
       
       //Get # of operations, # of memory operations, and # of operands:
       int numOperations = 0;
@@ -146,13 +114,64 @@ using namespace llvm;
                 numMemoryOps++;
             }
 
+            // if (LoadInst * linst = dyn_cast<LoadInst>(i)) {
+            //   for (auto U : linst->getOperand(0)->users())
+            //     { // U is of type User*
+            //       if (auto I = dyn_cast<StoreInst>(U))
+            //       {
+            //         FullDependence fDep = FullDependence(dyn_cast<Instruction>(linst), dyn_cast<Instruction>(I), false, 1);
+            //         auto distance = fDep.getDistance(1);
+            //         if (distance != nullptr) {
+            //           errs() << *(SE.getUnsignedRangeMax(distance).getRawData()) << "\n";
+            //         }
+            //       }
+            //     }
+            // }
+
             numOperands += i->getNumOperands();
         }
       }
 
-      //Get TripCount
-      unsigned int tripCount = SE.getSmallConstantTripCount(L);
+      //Get Trace Instruction Length
+      BasicBlock *currBB = L->getHeader();
+      int traceLength = 0;
 
+      // Loop through basic blocks, starting from the header
+      // Get the frequent path of the loop.
+      while (true)
+      {
+        bool freq_path = false;
+
+        // Loop through successor blocks
+        for (BasicBlock *bb : successors(currBB))
+        {
+          BranchProbability bprob = bpi.getEdgeProbability(
+              &(*currBB), bb);
+
+          // break on backedge
+          if (bb == L->getHeader() || traceLength > 200)
+          {
+            freq_path = false;
+            break;
+          }
+          if ((bprob.getNumerator() * 1.0 / bprob.getDenominator() - 0.8) >= -1e-8) // Floating point comparison
+          {
+            currBB = bb;
+            traceLength += std::distance(bb->begin(), bb->end());
+            freq_path = true;
+            break;
+          }
+        }
+
+        // If there are no frequent branches, exit the loop
+        if (freq_path == false)
+        {
+          break;
+        }
+      }
+
+      //Get TripCount
+      unsigned int tripCount = SE.getSmallConstantMaxTripCount(L);
       //Critical Path
 
       //Live Range
@@ -176,6 +195,7 @@ using namespace llvm;
       AU.addRequired<ScalarEvolutionWrapperPass>();
       AU.addRequired<BranchProbabilityInfoWrapperPass>();
       AU.addRequired<BlockFrequencyInfoWrapperPass>();
+      AU.addRequired<DependenceAnalysisWrapperPass>();
       //AU.addRequired<MachineFunctionWrapperPass>();
     }
 
