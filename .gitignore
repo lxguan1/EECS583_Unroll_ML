@@ -3,6 +3,7 @@
 *.bc
 *.json
 *.csv
+*env/
 
 # For lance
 specific_unroll_pass/*.tgz 

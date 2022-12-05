@@ -51,7 +51,7 @@ namespace Correctness{
 struct FPLICMPass : public LoopPass {
   static char ID;
   bool found_target = false;
-  const unsigned int unroll_amount = 4;
+  const unsigned int unroll_amount = 1;
   FPLICMPass() : LoopPass(ID) {}
 
   void printInstruction(Instruction* instr) {
@@ -72,7 +72,9 @@ struct FPLICMPass : public LoopPass {
     LoopNest ln = LoopNest(*L, *SE);
     unsigned int depth = ln.getNestDepth();
 
-    if (!found_target && depth == 1) {
+    errs() << depth << "\n";
+
+    if (!found_target && depth == 2) {
       found_target = true;
 
       // Setup (Code below taken from setLoopAlreadyUnrolled)

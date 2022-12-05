@@ -8,7 +8,7 @@ int main(){
 
 	// #pragma clang loop unroll_count(2)
 	for(i = 0; i < 10; i++) {
-  		for(j = 0; j < 10; j++) {
+  		for(j = 0; j < 10; j += 2) {
             B[j] = A[i];
         }
 	}
