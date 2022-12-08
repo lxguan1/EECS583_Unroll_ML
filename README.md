@@ -25,4 +25,4 @@ To train/validate the model, you will need to drag/drop training and validation 
 
 Two things of note are commented out by default:
   * The ```scheduler``` variable, which decreases the learning rate by ```gamma``` every ```step_size``` epochs. You can pass this into the ```mlp.train_model()``` function.  
-  * The ```class_weights``` tensor and its corresponding ```criterion```. These were calculated according to the label distribution with the formula ```w_j = n_samples / (n_classes * n_samples_j)```  
+  * The ```class_weights``` tensor and its corresponding ```criterion```. These were calculated according to the label distribution with the formula ```w_j = n_samples / (n_classes * n_samples_j)``` to help the model learn the minority classes.
