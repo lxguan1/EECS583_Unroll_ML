@@ -7,14 +7,23 @@ import pandas as pd
 import numpy as np
 
 def main(args):
-    csv_reader = csv.reader(open(args.label_csv, 'r'), delimiter=',')
+    label_df = pd.read_csv(args.label_csv, header=None)
+    feature_df = pd.read_csv(args.feature_csv, header=None)
     csv_writer = csv.writer(open(args.csv_out, 'w'), delimiter=',')
 
-    for line in csv_reader:
-        feat_vec = list(np.round(np.random.normal(size=8), 2))
-        line_w_feat = (line[0:1] + feat_vec) + line[1:]
+    # pdb.set_trace()
+    # Iterate through feature_df - that has limiting number of rows
+    for i, feat_row in feature_df.iterrows():
+        prob = feat_row[0]
+        
+        # Find row with same problem name and only take unroll ranks (.iloc[:, 1:])
+        label_ranks = label_df.loc[label_df[0] == prob].iloc[:, 1:]
+        if len(label_ranks) == 0:
+            continue
 
-        csv_writer.writerow(line_w_feat)
+        # Combine two rows as lists, write to csv
+        res_row = list(feat_row.values) + list(label_ranks.values[0])
+        csv_writer.writerow(list(res_row))
 
 
 if __name__ == "__main__":

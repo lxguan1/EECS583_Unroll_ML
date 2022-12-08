@@ -10,10 +10,15 @@ def main(args):
     with open(args.csv1, 'r') as file1, open(args.csv2, 'r') as file2:
         csvreader1 = csv.reader(file1)
         csvreader2 = csv.reader(file2)
+        # pdb.set_trace()
+        i = 0
         for row1, row2 in zip(csvreader1, csvreader2):
+            print(i)
+            i += 1
             # obtain list of unroll times and matching labels
             # unroll_times[0] matches with unroll_labels[0]
             unroll_times = row1[6:] + row2[6:]
+            unroll_times = [int(time.strip()) for time in unroll_times]
             unroll_labels = row1[2:6] + row2[2:6]
             problem = row1[0]
 
@@ -27,10 +32,6 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Script for determining unroll label')
-    parser.add_argument('--problem-root-dir', type=str,
-                        help='folder with problems inside')
-    parser.add_argument('--garbage-dir', type=str,
-                        help='where to move problems that we do not have results for')
     parser.add_argument('--csv-out', type=str,
                         help='locaton for problem folder with description, sample inputs, and random solution')
     parser.add_argument('--csv1', type=str,
