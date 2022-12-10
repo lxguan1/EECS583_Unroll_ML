@@ -6,25 +6,25 @@ import matplotlib.pyplot as plt
 import pdb
 
 def main(args):
+    n_classes = 8
     # pdb.set_trace()
     data = pd.read_csv(args.csv_in, header=None)
     data = data.to_numpy()
-    data = data[:, -8].astype(np.uint8)
+    data = data[:, 10].astype(np.uint8)
 
     counts = []
-    for i in range(1, 9):
+    for i in range(1, n_classes + 1):
         counts.append(len(data[data == i]))
     counts = np.array(counts)
 
     n = len(data)
-    n_classes = 8
     proportions = counts / n
-    class_weights = np.array([n]*8) / (n_classes * counts)
+    class_weights = np.array([n]*n_classes) / (n_classes * counts) # Numerator is expanding list, denominator is actually multiplying
     print("Class proportions:", np.round(proportions, 4))
     print("Class weights:", np.round(class_weights, 4))
 
 
-    plt.bar(list(range(1, 9)), height=counts)
+    plt.bar(list(range(1, n_classes + 1)), height=counts)
     plt.show()
 
 if __name__ == "__main__":

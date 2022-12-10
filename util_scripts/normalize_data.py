@@ -5,6 +5,8 @@ import csv
 import argparse
 import pdb
 
+# NOTE CURRENT TRAIN / VAL WERE NORMALIZED INDEPENDENTLY WHEN THEY PROBABLY SHOULD HAVE BEEN NORMALIZED AS ONE BIG FILE
+
 def main(args):
     # pdb.set_trace()
     data = pd.read_csv(args.csv_in, header=None).to_numpy()
