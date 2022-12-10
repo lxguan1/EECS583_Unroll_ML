@@ -5,7 +5,7 @@ import csv
 import argparse
 import pdb
 
-# NOTE CURRENT TRAIN / VAL WERE NORMALIZED INDEPENDENTLY WHEN THEY PROBABLY SHOULD HAVE BEEN NORMALIZED AS ONE BIG FILE
+# NOTE ORIGINAL TRAIN / VAL WERE NORMALIZED INDEPENDENTLY WHEN THEY PROBABLY SHOULD HAVE BEEN NORMALIZED AS ONE BIG FILE
 
 def main(args):
     # pdb.set_trace()
@@ -15,7 +15,6 @@ def main(args):
     data[:, 1:10] = data[:, 1:10] / max_vals
 
     np.savetxt(args.csv_out, data, delimiter=',', fmt='%s')
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='')
